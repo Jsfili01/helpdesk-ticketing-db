@@ -45,7 +45,7 @@ CREATE TABLE Employee
 -- -------------------------------------------------------------
 -- END_USER (subtype of Employee)
 -- Employees who are allowed to submit tickets.
--- Each End_User belongs to exactly one Departmen.
+-- Each End_User belongs to exactly one Department.
 -- employee_id is both PK and FK to Employee (1-to-1 inheritance).
 -- -------------------------------------------------------------
 
@@ -166,4 +166,5 @@ CREATE INDEX idx_ticket_status        ON Ticket(status_id);
 CREATE INDEX idx_ticket_category      ON Ticket(category_id);
 CREATE INDEX idx_ticket_enduser       ON Ticket(End_User_id);
 CREATE INDEX idx_assignment_ticket    ON Assignments(ticket_id);
+CREATE INDEX idx_assignment_tech      ON Assignments(technician_id);
 
