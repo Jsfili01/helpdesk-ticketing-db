@@ -52,7 +52,7 @@ CREATE TABLE Employee
 CREATE TABLE End_User 
 (
   employee_id   BIGINT PRIMARY KEY,
-  department_id BIGING NOT NULL,
+  department_id BIGINT NOT NULL,
 
   FOREIGN KEY (employee_id)    REFERENCES Employee(employee_id)   ON DELETE CASCADE,
   FOREIGN KEY (department_id) REFERENCES Department(department_id)
@@ -161,3 +161,9 @@ CREATE TABLE Assignments
   FOREIGN KEY (technician_id) REFERENCES Technician(employee_id)
 
 );
+
+CREATE INDEX idx_ticket_status        ON Ticket(status_id);
+CREATE INDEX idx_ticket_category      ON Ticket(category_id);
+CREATE INDEX idx_ticket_enduser       ON Ticket(End_User_id);
+CREATE INDEX idx_assignment_ticket    ON Assignments(ticket_id);
+
