@@ -160,18 +160,21 @@ ORDER BY t.creation_date ASC;
 -- -------------------------------------------------------------
 -- READ 3: Technician workload
 -- Count of active (non-Closed) tickets per technician.
+-- Uses CASE WHEN inside COUNT so closed tickets are excluded
+-- without dropping technicians who only have closed tickets.
 -- Helps managers spot overloaded staff.
 -- -------------------------------------------------------------
 SELECT
   e.name             AS technician_name,
   tech.skill_level,
-  COUNT(a.ticket_id) AS active_ticket_count
+  COUNT(
+        CASE WHEN s.status_name <> 'Closed' THEN a.ticket_id END
+  ) AS active_ticket_count
 FROM Technician  tech
 JOIN Employee    e   ON e.employee_id    = tech.employee_id
 LEFT JOIN Assignments a ON a.technician_id = tech.employee_id
 LEFT JOIN Ticket      t ON t.ticket_id     = a.ticket_id
 LEFT JOIN Status      s ON s.status_id     = t.status_id
-                       AND s.status_name  <> 'Closed'
 GROUP BY e.name, tech.skill_level
 ORDER BY active_ticket_count DESC;
 
