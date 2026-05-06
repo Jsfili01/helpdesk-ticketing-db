@@ -1,0 +1,154 @@
+// =============================================================
+// dbdiagram_schema.dbml
+// Purpose: dbdiagram.io schema for IT Helpdesk Ticket
+//          Management System
+// Matches:  001_init.sql exactly
+// Team: Julian Chavez, Jordan Sfiligoj, Joshua Torres
+// Course: CPSC 332 – CSUF
+// =============================================================
+// HOW TO USE:
+//   1. Go to https://dbdiagram.io and click "Create your diagram"
+//   2. Delete all default code in the left panel
+//   3. Paste this entire file into the left panel
+//   4. The diagram renders automatically on the right
+//   5. Click Share -> Copy Link to get your public URL
+//   6. Paste that URL into the README Project Links section
+// =============================================================
+
+
+// -------------------------------------------------------------
+// DEPARTMENT
+// Stores physical departments within the organization.
+// An End_User belongs to exactly one department.
+// -------------------------------------------------------------
+Table Department {
+  department_id     bigint      [pk, increment]
+  department_name   varchar(100) [not null, unique]
+  building_location varchar(100) [not null]
+}
+
+
+// -------------------------------------------------------------
+// EMPLOYEE (supertype)
+// Stores all shared employee attributes.
+// Every employee must belong to exactly one subtype:
+// End_User, Technician, or Admin (disjoint constraint).
+// Business Rules: unique employee_id, email, and SSN.
+// DOB must be a valid past date (CHECK DOB < CURRENT_DATE).
+// -------------------------------------------------------------
+Table Employee {
+  employee_id bigint       [pk, increment]
+  name        varchar(120) [not null]
+  SSN         char(11)     [not null, unique, note: 'Format: XXX-XX-XXXX']
+  DOB         date         [not null, note: 'CHECK: DOB < CURRENT_DATE']
+  email       varchar(255) [not null, unique]
+  address     varchar(255) [not null]
+}
+
+
+// -------------------------------------------------------------
+// END_USER (subtype of Employee)
+// Employees who are allowed to submit tickets.
+// Each End_User belongs to exactly one Department.
+// employee_id is both PK and FK to Employee (1-to-1 inheritance).
+// -------------------------------------------------------------
+Table End_User {
+  employee_id   bigint [pk, ref: - Employee.employee_id, note: 'PK + FK, ON DELETE CASCADE']
+  department_id bigint [not null, ref: > Department.department_id]
+}
+
+
+// -------------------------------------------------------------
+// TECHNICIAN (subtype of Employee)
+// IT staff who are assigned to and resolve tickets.
+// employee_id is both PK and FK to Employee (1-to-1 inheritance).
+// -------------------------------------------------------------
+Table Technician {
+  employee_id bigint      [pk, ref: - Employee.employee_id, note: 'PK + FK, ON DELETE CASCADE']
+  skill_level varchar(50) [not null, note: 'e.g. Junior, Mid-Level, Senior']
+}
+
+
+// -------------------------------------------------------------
+// ADMIN (subtype of Employee)
+// Administrators who monitor system performance.
+// employee_id is both PK and FK to Employee (1-to-1 inheritance).
+// -------------------------------------------------------------
+Table Admin {
+  employee_id bigint      [pk, ref: - Employee.employee_id, note: 'PK + FK, ON DELETE CASCADE']
+  admin_level varchar(50) [not null, note: 'e.g. Super Admin, Department Admin']
+}
+
+
+// -------------------------------------------------------------
+// STATUS (lookup table)
+// Valid ticket statuses enforcing Business Rule #8.
+// CHECK: status_name IN ('Open', 'In Progress', 'Closed')
+// -------------------------------------------------------------
+Table Status {
+  status_id   bigint      [pk, increment]
+  status_name varchar(20) [not null, unique, note: 'CHECK: Open | In Progress | Closed']
+}
+
+
+// -------------------------------------------------------------
+// CATEGORY (lookup table)
+// Classifies tickets by issue type.
+// e.g. Network, Hardware, Software, Account Access, Other
+// -------------------------------------------------------------
+Table Category {
+  category_id   bigint      [pk, increment]
+  category_name varchar(60) [not null, unique]
+}
+
+
+// -------------------------------------------------------------
+// TICKET
+// Core entity. Submitted by an End_User only (BR #4, #5).
+// Must have a valid status and category.
+// Business Rule #9: resolution_details only set when Closed.
+// Business Rule #10: resolution_date must be after creation_date.
+// Business Rule #12: UNIQUE(End_User_id, title, creation_date)
+//   prevents duplicate tickets from the same user.
+// Indexes: status_id, category_id, End_User_id
+// -------------------------------------------------------------
+Table Ticket {
+  ticket_id          bigint       [pk, increment]
+  title              varchar(140) [not null]
+  description        text         [not null]
+  creation_date      timestamptz  [not null, default: `now()`]
+  resolution_details text         [null, note: 'Only set when Closed (BR #9, enforced by trigger)']
+  resolution_date    timestamptz  [null, note: 'CHECK: NULL OR resolution_date > creation_date (BR #10)']
+  status_id          bigint       [not null, ref: > Status.status_id]
+  category_id        bigint       [not null, ref: > Category.category_id]
+  End_User_id        bigint       [not null, ref: > End_User.employee_id]
+
+  indexes {
+    status_id          [name: 'idx_ticket_status']
+    category_id        [name: 'idx_ticket_category']
+    End_User_id        [name: 'idx_ticket_enduser']
+    (End_User_id, title, creation_date) [unique, name: 'uq_no_duplicate_tickets']
+  }
+}
+
+
+// -------------------------------------------------------------
+// ASSIGNMENTS (junction/associative table)
+// Resolves the M:N relationship between Ticket and Technician.
+// A ticket can have multiple technicians (BR #6).
+// A technician must exist before being assigned (BR #7).
+// UNIQUE(ticket_id, technician_id) prevents duplicate assignments.
+// ON DELETE CASCADE: deleting a Ticket removes its assignments.
+// Indexes: ticket_id, technician_id
+// -------------------------------------------------------------
+Table Assignments {
+  assignment_id bigint [pk, increment]
+  ticket_id     bigint [not null, ref: > Ticket.ticket_id, note: 'ON DELETE CASCADE']
+  technician_id bigint [not null, ref: > Technician.employee_id]
+
+  indexes {
+    ticket_id     [name: 'idx_assignment_ticket']
+    technician_id [name: 'idx_assignment_tech']
+    (ticket_id, technician_id) [unique, name: 'uq_no_duplicate_assignment']
+  }
+}
