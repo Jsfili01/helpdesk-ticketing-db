@@ -70,7 +70,9 @@ INSERT INTO Admin (employee_id, admin_level) VALUES
 (13, 'Department Admin');
 
 -- -------------------------------------------------------------
--- STATUS (3 rows — must match CHECK constraint in 001_init.sql)
+-- STATUS ( 3 rows only - CHECK constraints in 001_init.sql restricts
+--valid values to exactly: 'Open', 'In Progress', 'Closed'. 
+-- A 4th or 5th row would violate the schema by design.)
 -- -------------------------------------------------------------
 INSERT INTO Status (status_name) VALUES
 ('Open'),
