@@ -97,7 +97,9 @@ helpdesk-ticketing-db/
 |-- migrations/
 |   |-- 001_init.sql               # CREATE TABLE statements, PKs, FKs, constraints, indexes
 |   |-- 002_seed_data.sql          # INSERT statements, 5+ rows per table
-|   `-- 003_queries_examples.sql   # Trigger, View, SELECT, UPDATE, DELETE examples
+|   |-- 003_triggers.sql           # Trigger enforcing business rules #9 and #10
+|   |-- 004_views.sql              # View providing unified ticket dashboard
+|   `-- 005_queries.sql            # SELECT, UPDATE, and DELETE query examples
 |
 `-- README.md
 ```
@@ -137,12 +139,26 @@ migrations/002_seed_data.sql
 ```
 Inserts realistic sample data: 5 departments, 13 employees (5 end users, 5 technicians, 3 admins), 8 tickets, and 9 assignments.
 
-### Step 3 - Load Queries, Trigger and View
+### Step 3 - Create Triggers
 ```sql
 -- Paste and run the contents of:
-migrations/003_queries_examples.sql
+migrations/003_triggers.sql
 ```
-Creates the `trg_enforce_closed_ticket_resolution` trigger, the `vw_ticket_dashboard` view, and demonstrates all CRUD operations.
+Creates `trg_enforce_closed_ticket_resolution`, which enforces business rules #9 and #10 on every ticket insert and update.
+
+### Step 4 - Create Views
+```sql
+-- Paste and run the contents of:
+migrations/004_views.sql
+```
+Creates `vw_ticket_dashboard`, a unified view joining all 9 tables for simplified ticket reporting.
+
+### Step 5 - Run Query Examples
+```sql
+-- Paste and run the contents of:
+migrations/005_queries.sql
+```
+Demonstrates all CRUD operations: 7 SELECT queries with JOINs, 7 UPDATE queries, and 6 DELETE queries.
 
 ---
 
@@ -180,7 +196,7 @@ WHERE s.status_name = 'Open';
 |---|---|
 | Julian Chavez | Schema design, `001_init.sql`, business rules |
 | Jordan Sfiligoj | Seed data, `002_seed_data.sql`, GitHub setup |
-| Joshua Torres | Query design, `003_queries_examples.sql`, README |
+| Joshua Torres | `003_triggers.sql`, `004_views.sql`, `005_queries.sql`, README |
 
 View full commit history: [GitHub Contributors](https://github.com/Jsfili01/helpdesk-ticketing-db/graphs/contributors)
 
@@ -192,5 +208,5 @@ View full commit history: [GitHub Contributors](https://github.com/Jsfili01/help
 |---|---|
 | GitHub Repository | https://github.com/Jsfili01/helpdesk-ticketing-db |
 | DBDiagram Schema | https://dbdiagram.io/d/dbdiagram_schema-69f9637ac6a36f9c1b045ce7 |
-| Cloud Demo Video | *(Screen recording link)* |
-| Supabase Project | *(Supabase project URL)* |
+| Cloud Demo Video | *(screen recording link)* |
+| Supabase Project | https://etmaozrxnpkqriiazplg.supabase.co |
