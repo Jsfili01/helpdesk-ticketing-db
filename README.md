@@ -207,6 +207,5 @@ View full commit history: [GitHub Contributors](https://github.com/Jsfili01/help
 | Resource | Link |
 |---|---|
 | GitHub Repository | https://github.com/Jsfili01/helpdesk-ticketing-db |
-| DBDiagram Schema | https://dbdiagram.io/d/dbdiagram_schema-69f9637ac6a36f9c1b045ce7 |
-| Cloud Demo Video | *(Add screen recording pretty please)* |
-| Supabase Project | https://etmaozrxnpkqriiazplg.supabase.co |
+| DBDiagram Schema | https://dbdiagram.io/d/helpdesk-ticketing-db-Schema-69efbec7c6a36f9c1b99316a |
+| Cloud Demo Video | https://www.youtube.com/watch?v=_mIPfmlxIvM |
